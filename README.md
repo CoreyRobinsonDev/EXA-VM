@@ -2,13 +2,19 @@
 - **R/N**               A register, or a number between -9999 and 9999
 - **L**                 A label defined by a **MARK** pseudo-instruction
 
+# Hosts
+A host is a representation of a computer network. An EXA can only exist inside a host. When you create them they'll be in your host, but when you run them they can upload into your target host and execute there.
+
+# Links
+Links connect hosts to each other, and are what EXAs use to travel between hosts. Links have a numerical ID at each end which lets you reference them in your code.
+
 # REGISTERS
 ### X
 The **X** register is a general-purpose storage register and can store a number or a keyword.
 ### T
 The **T** register is a general-purpose storage register and can store a number or a keyword. It is also the destination for **TEST** instructions, and is the criterion for conditional jumps (TJMP and FJMP).
 ### F
-The **F** register allows an EXA to read and write the contents of a held file. When an EXA grabs a file, its "file cursor" will be set to the first value in hte file. Reading from the **F** register will read this value; writing to the **F** register will overwrite this value. After reading or writing the **F** register, the file cursor will automatically advance. Writing to the end of the file will append a new value instead of overwriting. 
+The **F** register allows an EXA to read and write the contents of a held file. When an EXA grabs a file, its "file cursor" will be set to the first value in the file. Reading from the **F** register will read this value; writing to the **F** register will overwrite this value. After reading or writing the **F** register, the file cursor will automatically advance. Writing to the end of the file will append a new value instead of overwriting. 
 ### M
 The **M** register controls an EXA's message-passing functionality. When an EXA writes to the **M** register the value will be stored in that EXA's outgoing message slot until another EXA reads from the **M** register and receives the previously written value. Both numbers and keywords can be transferred in this way.
 
@@ -89,3 +95,16 @@ By default, an EXA can communicate with any other EXA in the same network. This 
 - **NOTE**              Any text following the **NOTE** pseudo-instruction will be discar4ed when compiling, allowing it to be used to write "comments" to document the code. Any test following a semicolon, anywhere on a line, will also be discarded.
 - **NOOP**              Do nothing for one cycle
 - **RAND R/N R/N R**    Generate a random number between the first and second operand (inclusive) and store the result in the third operand.
+
+# Pseudo-Instructions
+## Code Repetition
+
+- **@REP N**            Repeat the code between this and the subsequent **@END** pseudo-instruction N times. N has to be a constant number, not a register, since the duplication occurs before the program starts running. You also can't nest **@REP**/**@END** blocks.
+- **@{N,M}**            This substitutes a calculated numberical constant. On the first repetition, the value N will be used. On subsequent repetitions, the value will increase by M each time. N and M have to be constant numbers.
+
+# Default Registers
+
+- **#STDI**         Standard in     (read-only)
+- **#STDO**         Standard out    (write-only)
+- **#STDE**         Standard error  (write-only)
+

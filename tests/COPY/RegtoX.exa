@@ -1,0 +1,4 @@
+HOST main
+
+COPY 1 X
+COPY X X
