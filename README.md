@@ -1,6 +1,7 @@
 - **R**                 A register
 - **R/N**               A register, or a number between -9999 and 9999
 - **L**                 A label defined by a **MARK** pseudo-instruction
+- **K**                 A keyword
 
 # Hosts
 A host is a representation of a computer network. An EXA can only exist inside a host. When you create them they'll be in your host, but when you run them they can upload into your target host and execute there.
@@ -81,7 +82,7 @@ By default, an EXA can communicate with any other EXA in the same network. This 
 
 ## File Manipulation
 
-- **MAKE**              Create and grab a new file.
+- **MAKE K**            Create and grab a new file.
 - **GRAB R/N**          Grab the file with the specified ID.
 - **FILE R**            Copy the ID of the held file into the specified register. 
 - **SEEK R/N**          Move the file cursor forward (positive) or backward (negative) by the specified number of values.

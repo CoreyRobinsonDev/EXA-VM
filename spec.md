@@ -11,6 +11,13 @@
 #### COPY
 `COPY R/N R`
 
+#### MAKE
+- create and grab a file with `MAKE`
+- `MAKE` takes an optional filename as it's only argument
+```exa
+MAKE <filename>
+```
+
 # Example
 ```exa
 HOST main

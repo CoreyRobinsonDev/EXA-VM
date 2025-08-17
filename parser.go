@@ -35,6 +35,7 @@ func NewExa(filePath string) (Exa, error) {
 		}
 	}
 
+	vm.Exas++
 	return exa, nil
 }
 
@@ -154,6 +155,14 @@ func host(name string, exa *Exa) error {
 	return nil
 }
 func mode() error { return nil }
+func _make(name string, exa *Exa) error { 
+	file := Unwrap(os.Create("./" + name))
+	defer file.Close()
+
+	exa.F = name
+
+	return nil
+}
 func grab() error { return nil }
 func file() error { return nil }
 func seek() error { return nil }
@@ -186,6 +195,7 @@ func NewKeyword(text string) (Keyword, error) {
 	case "LINK": return LINK, nil
 	case "HOST": return HOST, nil
 	case "MODE": return MODE, nil
+	case "MAKE": return MAKE, nil
 	case "GRAB": return GRAB, nil
 	case "FILE": return FILE, nil
 	case "SEEK": return SEEK, nil
@@ -219,6 +229,7 @@ const (
 	LINK
 	HOST
 	MODE
+	MAKE
 	GRAB
 	FILE
 	SEEK
@@ -250,6 +261,7 @@ func (k Keyword) String() string {
 	case LINK: return "LINK"
 	case HOST: return "HOST"
 	case MODE: return "MODE"
+	case MAKE: return "MAKE"
 	case GRAB: return "GRAB"
 	case FILE: return "FILE"
 	case SEEK: return "SEEK"
@@ -291,6 +303,15 @@ func (k Keyword) Eval(exa *Exa, args... string) error {
 		}
 		return host(args[1], exa)
 	case MODE: return mode()
+	case MAKE: 
+		filename := ""
+		if len(args) <= 1 {
+			filename = fmt.Sprintf("%d", 400 + vm.Files)
+			vm.Files++
+		} else {
+			filename = args[1]
+		}
+		return _make(filename, exa)
 	case GRAB: return grab()
 	case FILE: return file()
 	case SEEK: return seek()

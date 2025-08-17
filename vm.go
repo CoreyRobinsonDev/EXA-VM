@@ -3,6 +3,7 @@ package main
 
 type VM struct {
 	Exas int
+	Files int
 }
 
 type Exa struct {

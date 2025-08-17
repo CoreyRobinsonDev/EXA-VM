@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
@@ -175,3 +176,25 @@ func TestCopyNumberUnderflow(t *testing.T) {
 	}
 }
 // COPY
+
+// FILE
+func TestMakeDefault(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/MAKE/MakeDefault.exa"))
+	_, err := os.Open("./400")
+	Expect(os.Remove("./400"))
+
+	if exa.F != "400" || err != nil {
+		t.Errorf("MakeDefault failed, expected 400, got %s", exa.F)
+	}
+}
+
+func TestMakeWithName(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/MAKE/MakeWithName.exa"))
+	_, err := os.Open("./test.txt")
+	Expect(os.Remove("./test.txt"))
+
+	if exa.F != "test.txt" || err != nil {
+		t.Errorf("MakeDefault failed, expected test.txt, got %s", exa.F)
+	}
+}
+// FILE
