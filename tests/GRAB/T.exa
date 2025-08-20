@@ -1,0 +1,4 @@
+HOST main
+
+COPY ./tests/GRAB/file1 T
+GRAB T

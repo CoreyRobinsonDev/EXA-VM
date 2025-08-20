@@ -27,6 +27,13 @@ SEEK 1
 SEEK -9999
 ```
 
+#### GRAB
+- grab a file into the `F` register
+
+```exa
+GRAB index.html
+```
+
 # Example
 ```exa
 HOST main

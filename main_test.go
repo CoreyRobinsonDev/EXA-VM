@@ -296,3 +296,58 @@ func TestSeekUnderflows(t *testing.T) {
 	}
 }
 // SEEK
+
+// GRAB
+func TestGrabFakeFile(t *testing.T) {
+	_, err := NewExa("./tests/GRAB/FakeFile.exa")
+
+	if err == nil {
+		t.Error("GrabFakeFile failed, expected error to be thrown on attempting to GRAB a non-existent file")
+	}
+}
+
+func TestGrabM(t *testing.T) {
+	// TODO: can only be tested when REPL is implemented
+}
+
+func TestGrabX(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/GRAB/X.exa"))
+
+	if exa.F != "./tests/GRAB/file1" {
+		t.Error(fmt.Sprintf("GrabX failed, expected ./tests/GRAB/file1, got %s", exa.F))
+	}
+}
+
+func TestGrabT(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/GRAB/T.exa"))
+
+	if exa.F != "./tests/GRAB/file1" {
+		t.Error(fmt.Sprintf("GrabT failed, expected ./tests/GRAB/file1, got %s", exa.F))
+	}
+}
+
+func TestGrabNoName(t *testing.T) {
+	_, err := NewExa("./tests/GRAB/NoName.exa")
+
+	if err == nil {
+		t.Error("GrabNoName failed, expected error to be thrown on attempting to GRAB without a filename")
+	}
+}
+
+func TestGrabOneFile(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/GRAB/OneFile.exa"))
+
+	if exa.F != "./tests/GRAB/file1" {
+		t.Error(fmt.Sprintf("GrabOneFile failed, expected ./tests/GRAB/file1, got %s", exa.F))
+	}
+}
+
+func TestGrabTwoFiles(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/GRAB/TwoFiles.exa"))
+
+	if exa.F != "./tests/GRAB/file2" {
+		t.Error(fmt.Sprintf("GrabTwoFiles failed, expected ./tests/GRAB/file2, got %s", exa.F))
+	}
+}
+
+// GRAB

@@ -1,0 +1,4 @@
+HOST main
+
+GRAB ./tests/GRAB/file1
+GRAB ./tests/GRAB/file2

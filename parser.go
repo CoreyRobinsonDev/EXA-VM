@@ -89,10 +89,7 @@ func _copy(src, dst string, exa *Exa) error {
 			return errors.New(fmt.Sprintf("Invalid COPY destination %s", dst))
 		}
 	default:
-		srcNum, err := strconv.Atoi(src) 
-		if err != nil {
-			return errors.New(fmt.Sprintf("Invalid COPY source %s", src))
-		}
+		srcNum, _ := strconv.Atoi(src) 
 
 		if srcNum > 9999 {
 			return errors.New(fmt.Sprintf("COPY overflow: %d exceeds 9999", srcNum))
@@ -145,7 +142,25 @@ func _make(name string, exa *Exa) error {
 
 	return nil
 }
-func grab() error { return nil }
+func grab(name string, exa *Exa) error { 
+	if name == "X" {
+		name = exa.X
+	} else if name == "T" {
+		name = exa.T
+	} else if name == "M" {
+		name = <- exa.M
+	}
+
+	_, err := os.ReadFile(name)
+
+	if err != nil {
+		return errors.New(fmt.Sprintf("GRAB: File %s could not be found", name))
+	}
+
+	exa.F = name
+
+	return nil 
+}
 func file() error { return nil }
 func seek(amount string, exa *Exa) error { 
 	if exa.F == "" { return errors.New("SEEK: No file to SEEK") }
@@ -306,7 +321,7 @@ func (k Keyword) Eval(exa *Exa, args... string) error {
 	switch k {
 	case COPY: 
 		if len(args) <= 2 {
-			return errors.New(fmt.Sprintf("COPY: index 2, out of range of %v array", args))
+			return errors.New("COPY: missing argument")
 		}
 		return _copy(args[1], args[2], exa)
 	case ADDI: return addi()
@@ -326,7 +341,7 @@ func (k Keyword) Eval(exa *Exa, args... string) error {
 	case LINK: return link()
 	case HOST: 
 		if len(args) <= 1 {
-			return errors.New(fmt.Sprintf("HOST: index 1, out of range of %v array", args))
+			return errors.New("HOST: missing host name" )
 		}
 		return host(args[1], exa)
 	case MODE: return mode()
@@ -339,11 +354,15 @@ func (k Keyword) Eval(exa *Exa, args... string) error {
 			filename = args[1]
 		}
 		return _make(filename, exa)
-	case GRAB: return grab()
+	case GRAB:
+		if len(args) <= 1 {
+			return errors.New("GRAB: missing file name" )
+		} 
+		return grab(args[1], exa)
 	case FILE: return file()
 	case SEEK: 
 		if len(args) <= 1 {
-			return errors.New(fmt.Sprintf("SEEK: index 1, out of range of %v array", args))
+			return errors.New("SEEK: missing cursor move amount")
 		}
 		return seek(args[1], exa)
 	case VOID: return void()
