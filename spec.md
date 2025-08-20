@@ -9,13 +9,22 @@
 `LINK <internal ID> <external ID>`
 
 #### COPY
-`COPY R/N R`
+- copy a number or keyword to a register
+`COPY R/N/K R`
 
 #### MAKE
 - create and grab a file with `MAKE`
 - `MAKE` takes an optional filename as it's only argument
 ```exa
 MAKE <filename>
+```
+
+#### SEEK
+- move file cursor within a file
+- `SEEK` values will be clamped to the length of the file
+```exa
+SEEK 1
+SEEK -9999
 ```
 
 # Example

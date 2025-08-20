@@ -1,0 +1,7 @@
+HOST main
+
+MAKE
+COPY 1 F
+COPY 2 F
+SEEK -9999
+COPY F X

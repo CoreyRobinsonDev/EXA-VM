@@ -1,5 +1,13 @@
 package main
 
+import (
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"strings"
+)
+
 
 type VM struct {
 	Exas int
@@ -29,4 +37,58 @@ By default, an EXA can communicate with any other EXA in the same network. This 
 	Code string
 }
 
+func (e *Exa) ReadFile() (string, error) {
+	file, err := os.OpenFile(e.F, os.O_RDWR, 0644)
+	defer file.Close()
 
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("COPY: Invalid file location %s", e.F))
+	}
+
+	content := string(Unwrap(os.ReadFile(e.F)))
+	contentArr := strings.Split(content, " ")
+
+	if len(contentArr) <= e.FileCursor {
+		return "", errors.New(fmt.Sprintf("COPY: file cursor position (%d) greater than %s file length", e.FileCursor, e.F))
+	}
+
+	bytes := make([]byte, len(contentArr[e.FileCursor]))
+
+	contentOffset := ""
+	for i, word := range contentArr {
+		if i == e.FileCursor { break }
+		contentOffset += word + " "
+	}
+
+	_, fileErr := file.ReadAt(bytes, int64(len(contentOffset)))
+
+	if fileErr != io.EOF && fileErr != nil {
+		return "", fileErr
+	}
+	e.FileCursor++
+
+	return string(bytes), nil
+}
+
+func (e *Exa) WriteFile(word string) error {
+	file, err := os.OpenFile(e.F, os.O_RDWR, 0644)
+	defer file.Close()
+
+	if err != nil {
+		return errors.New(fmt.Sprintf("COPY: Invalid file location %s", e.F))
+	}
+
+	content := string(Unwrap(os.ReadFile(e.F)))
+	contentArr := strings.Split(content, " ")
+
+	contentOffset := ""
+	for i, word := range contentArr {
+		if i == e.FileCursor { break }
+		contentOffset += word + " "
+	}
+
+	Unwrap(file.WriteAt([]byte(strings.Trim(word, "\"") + " "), int64(len(contentOffset))))
+	e.FileCursor++
+
+	return nil
+}

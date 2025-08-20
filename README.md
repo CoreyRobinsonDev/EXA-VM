@@ -1,7 +1,8 @@
 - **R**                 A register
-- **R/N**               A register, or a number between -9999 and 9999
-- **L**                 A label defined by a **MARK** pseudo-instruction
 - **K**                 A keyword
+- **R/N**               A register, or a number between -9999 and 9999
+- **R/N/K**               A register, a number between -9999 and 9999, or a keyword
+- **L**                 A label defined by a **MARK** pseudo-instruction
 
 # Hosts
 A host is a representation of a computer network. An EXA can only exist inside a host. When you create them they'll be in your host, but when you run them they can upload into your target host and execute there.
@@ -26,14 +27,14 @@ By default, an EXA can communicate with any other EXA in the same network. This 
 # INSTRUCTIONS
 ## Manipulating Values
 
-- **COPY R/N R**        Copy the value of the first operand into the second operand.
-- **ADDI R/N R/N R**    Add the value of the first operand to the value of the second operand and store the result in the third operand.
-- **SUBI R/N R/N R**    Subtract the value of the second operand from the value of the first operand and store the result in the third operand.
-- **MULI R/N R/N R**    Multiply the value of the first operand to the value of the second operand and store the result in the third operand.
-- **DIVI R/N R/N R**    Divide the value of the first operand by the value of the second operand and store the result in the third operand.
-- **MODI R/N R/N R**    Modulo the value of the first operand by the value of the second operand and store the result in the third operand.
+- **COPY R/N/K R**          Copy the value of the first operand into the second operand.
+- **ADDI R/N R/N R**        Add the value of the first operand to the value of the second operand and store the result in the third operand.
+- **SUBI R/N R/N R**        Subtract the value of the second operand from the value of the first operand and store the result in the third operand.
+- **MULI R/N R/N R**        Multiply the value of the first operand to the value of the second operand and store the result in the third operand.
+- **DIVI R/N R/N R**        Divide the value of the first operand by the value of the second operand and store the result in the third operand.
+- **MODI R/N R/N R**        Modulo the value of the first operand by the value of the second operand and store the result in the third operand.
 
-- **SWIZ R/N R/N R**    Swizzle the value of the first operand using the value of the second operand as a swizzle mask and store the result in the third operand. The swizzle insturction can be used to rearrange and/or extract the digits in a number as shown:
+- **SWIZ R/N R/N R**        Swizzle the value of the first operand using the value of the second operand as a swizzle mask and store the result in the third operand. The swizzle insturction can be used to rearrange and/or extract the digits in a number as shown:
 
 | Input | Mask | Result |
 |-------|------|--------|

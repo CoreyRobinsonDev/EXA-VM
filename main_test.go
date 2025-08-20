@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -175,26 +176,123 @@ func TestCopyNumberUnderflow(t *testing.T) {
 		t.Error("CopyNumberUnderflow failed, expected error to be thrown on attempting to copy number under -9999")
 	}
 }
+
+func TestCopyRegToFile(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/COPY/FtoReg.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.T != "1" {
+		t.Errorf("CopyRegToFile failed, expected 1, got %s", exa.T)
+	}
+}
 // COPY
 
 // FILE
 func TestMakeDefault(t *testing.T) {
 	exa := Unwrap(NewExa("./tests/MAKE/MakeDefault.exa"))
-	_, err := os.Open("./400")
-	Expect(os.Remove("./400"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	_, err := os.ReadFile(filename)
+	Expect(os.Remove(filename))
 
-	if exa.F != "400" || err != nil {
-		t.Errorf("MakeDefault failed, expected 400, got %s", exa.F)
+	if exa.F != filename || err != nil {
+		t.Errorf("MakeDefault failed, expected %s, got %s", filename, exa.F)
 	}
 }
 
 func TestMakeWithName(t *testing.T) {
 	exa := Unwrap(NewExa("./tests/MAKE/MakeWithName.exa"))
-	_, err := os.Open("./test.txt")
-	Expect(os.Remove("./test.txt"))
+	_, err := os.ReadFile("test.txt")
+	Expect(os.Remove("test.txt"))
 
 	if exa.F != "test.txt" || err != nil {
-		t.Errorf("MakeDefault failed, expected test.txt, got %s", exa.F)
+		t.Errorf("MakeWithName failed, expected test.txt, got %s", exa.F)
 	}
 }
 // FILE
+
+// SEEK
+func TestSeekBackwards(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/SEEK/SeekBackwards.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.X != "2" {
+		t.Errorf("SeekBackwards failed, expected 2, got %s", exa.X)
+	}
+}
+
+func TestSeekForwards(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/SEEK/SeekForward.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.X != "2" {
+		t.Errorf("SeekForwards failed, expected 2, got %s", exa.X)
+	}
+}
+
+func TestSeekJumpBeginning(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/SEEK/SeekJumpBeginning.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.X != "1" {
+		t.Errorf("SeekJumpBeginning failed, expected 1, got %s", exa.X)
+	}
+}
+
+func TestSeekJumpEnding(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/SEEK/SeekJumpEnding.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.X != "2" {
+		t.Errorf("SeekJumpEnding failed, expected 2, got %s", exa.X)
+	}
+}
+
+func TestSeekM(t *testing.T) {
+	// TODO: can only be tested when REPL is implemented
+}
+
+func TestSeekT(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/SEEK/SeekT.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.X != "1" {
+		t.Errorf("SeekT failed, expected 1, got %s", exa.X)
+	}
+}
+
+func TestSeekX(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/SEEK/SeekX.exa"))
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if exa.X != "1" {
+		t.Errorf("SeekX failed, expected 1, got %s", exa.X)
+	}
+}
+
+func TestSeekOverflow(t *testing.T) {
+	_, err := NewExa("./tests/SEEK/SeekOverflow.exa")
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if err == nil {
+		t.Error("SeekOverflow failed, expected error to be thrown on value over 9999")
+	}
+}
+
+func TestSeekUnderflows(t *testing.T) {
+	_, err := NewExa("./tests/SEEK/SeekUnderflow.exa")
+	filename := fmt.Sprintf("./%d", 400 + vm.Files)
+	Expect(os.Remove(filename))
+
+	if err == nil {
+		t.Error("SeekUnderflow failed, expected error to be thrown on value under -9999")
+	}
+}
+// SEEK

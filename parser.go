@@ -9,11 +9,13 @@ import (
 )
 
 func NewExa(filePath string) (Exa, error) {
+	vm.Exas++
 	code := string(Unwrap(os.ReadFile(filePath)))
 	name := strings.Split(strings.Split(filePath, "/")[len(strings.Split(filePath, "/"))-1], ".")[0]
 	exa := Exa {
 		Code: code,
 		Name: name,
+		FileCursor: 0,
 		M: make(chan string, 1),
 	}
 	file := Unwrap(os.Open(filePath))
@@ -26,16 +28,18 @@ func NewExa(filePath string) (Exa, error) {
 		keyword := Unwrap(NewKeyword(words[0]))
 		// Enforce HOST as the first command of a program
 		if keyword != HOST && exa.Host == "" {
+			vm.Exas--
 			return Exa{}, errors.New(fmt.Sprintf("%s %d: HOST must be defined at the start of program execution", name, lineNum))
 		}
 		err := keyword.Eval(&exa, words...)
 
 		if err != nil {
+			vm.Exas--
 			return Exa{}, err
 		}
 	}
 
-	vm.Exas++
+	vm.Exas--
 	return exa, nil
 }
 
@@ -43,15 +47,8 @@ func _copy(src, dst string, exa *Exa) error {
 	switch(strings.ToUpper(src)) {
 	case "X":
 		switch(strings.ToUpper(dst)) {
-		case "X":
-		case "F":
-			file, err := os.Open(exa.F)
-			defer file.Close()
-
-			if err != nil {
-				return errors.New(fmt.Sprintf("Invalid COPY file location %s", exa.F))
-			}
-			Unwrap(file.WriteAt([]byte(exa.X), int64(exa.FileCursor)))
+		case "X": break
+		case "F": return exa.WriteFile(exa.X)
 		case "T": exa.T = exa.X
 		case "M": 
 			exa.M <- exa.X
@@ -59,26 +56,25 @@ func _copy(src, dst string, exa *Exa) error {
 			return errors.New(fmt.Sprintf("Invalid COPY destination %s", dst))
 		}
 	case "F":
+		word, err := exa.ReadFile()
+
+		if err != nil {
+			return err
+		}
+
 		switch(strings.ToUpper(dst)) {
-		case "X": exa.X = exa.T
-		case "F":
-		case "T": exa.X = exa.T
-		case "M": exa.M <- exa.T
+		case "X": exa.X = word
+		case "F": break
+		case "T": exa.T = word
+		case "M": exa.M <- word
 		default:
 			return errors.New(fmt.Sprintf("Invalid COPY destination %s", dst))
 		}
 	case "T":
 		switch(strings.ToUpper(dst)) {
 		case "X": exa.X = exa.T
-		case "F":
-			file, err := os.Open(exa.F)
-			defer file.Close()
-
-			if err != nil {
-				return errors.New(fmt.Sprintf("Invalid COPY file location %s", exa.F))
-			}
-			Unwrap(file.WriteAt([]byte(exa.T), int64(exa.FileCursor)))
-		case "T":
+		case "F": return exa.WriteFile(exa.T)
+		case "T": break
 		case "M": exa.M <- exa.T
 		default:
 			return errors.New(fmt.Sprintf("Invalid COPY destination %s", dst))
@@ -87,15 +83,8 @@ func _copy(src, dst string, exa *Exa) error {
 		switch(strings.ToUpper(dst)) {
 		case "X": exa.X = <-exa.M
 		case "T": exa.T = <-exa.M
-		case "F":
-			file, err := os.Open(exa.F)
-			defer file.Close()
-
-			if err != nil {
-				return errors.New(fmt.Sprintf("Invalid COPY file location %s", exa.F))
-			}
-			Unwrap(file.WriteAt([]byte(<-exa.M), int64(exa.FileCursor)))
-		case "M":
+		case "F": return exa.WriteFile(<-exa.M)
+		case "M": break
 		default:
 			return errors.New(fmt.Sprintf("Invalid COPY destination %s", dst))
 		}
@@ -115,14 +104,7 @@ func _copy(src, dst string, exa *Exa) error {
 
 		switch(strings.ToUpper(dst)) {
 		case "X": exa.X = src
-		case "F":
-			file, err := os.Open(exa.F)
-			defer file.Close()
-
-			if err != nil {
-				return errors.New(fmt.Sprintf("Invalid COPY file location %s", exa.F))
-			}
-			Unwrap(file.WriteAt([]byte(src), int64(exa.FileCursor)))
+		case "F": return exa.WriteFile(src)
 		case "T": exa.T = src
 		case "M": exa.M <- src
 		default:
@@ -149,14 +131,14 @@ func kill() error { return nil }
 func link() error { return nil }
 func host(name string, exa *Exa) error {
 	if name == "" {
-		return errors.New("No HOST name provided")
+		return errors.New("HOST: No HOST name provided")
 	}
 	exa.Host = name
 	return nil
 }
 func mode() error { return nil }
 func _make(name string, exa *Exa) error { 
-	file := Unwrap(os.Create("./" + name))
+	file := Unwrap(os.Create(name))
 	defer file.Close()
 
 	exa.F = name
@@ -165,7 +147,52 @@ func _make(name string, exa *Exa) error {
 }
 func grab() error { return nil }
 func file() error { return nil }
-func seek() error { return nil }
+func seek(amount string, exa *Exa) error { 
+	if exa.F == "" { return errors.New("SEEK: No file to SEEK") }
+	content := string(Unwrap(os.ReadFile(exa.F)))
+	contentArr := strings.Split(content, " ")
+
+	if amount == "X" {
+		if exa.X == "" {
+			amount = "0"
+		} else {
+			amount = exa.X
+		}
+	} else if amount == "T" {
+		if exa.T == "" {
+			amount = "0"
+		} else {
+			amount = exa.T
+		}
+	} else if amount == "M" {
+		m := <- exa.M
+		if m == "" {
+			amount = "0"
+		} else {
+			amount = m
+		}
+	}
+
+	num, err := strconv.Atoi(amount)
+	if err != nil {
+		return errors.New(fmt.Sprintf("SEEK: non-numeric value %s used", amount))
+	} else if num > 9999 {
+		return errors.New(fmt.Sprintf("SEEK: value overflow on %s", amount))
+	} else if num < -9999 {
+		return errors.New(fmt.Sprintf("SEEK: value underflow on %s", amount))
+	}
+
+
+	exa.FileCursor += num
+
+	if exa.FileCursor >= len(contentArr) {
+		exa.FileCursor = len(contentArr) -2
+	} else if exa.FileCursor < 0 { 
+		exa.FileCursor = 0 
+	} 
+
+	return nil
+}
 func void() error { return nil }
 func drop() error { return nil }
 func wipe() error { return nil }
@@ -306,15 +333,19 @@ func (k Keyword) Eval(exa *Exa, args... string) error {
 	case MAKE: 
 		filename := ""
 		if len(args) <= 1 {
-			filename = fmt.Sprintf("%d", 400 + vm.Files)
 			vm.Files++
+			filename = fmt.Sprintf("./%d", 400 + vm.Files)
 		} else {
 			filename = args[1]
 		}
 		return _make(filename, exa)
 	case GRAB: return grab()
 	case FILE: return file()
-	case SEEK: return seek()
+	case SEEK: 
+		if len(args) <= 1 {
+			return errors.New(fmt.Sprintf("SEEK: index 1, out of range of %v array", args))
+		}
+		return seek(args[1], exa)
 	case VOID: return void()
 	case DROP: return drop()
 	case WIPE: return wipe()
@@ -351,3 +382,4 @@ func (r Register) String() string {
 	default: return "{ERROR}"
 	}
 }
+
