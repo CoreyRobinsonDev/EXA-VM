@@ -37,6 +37,8 @@ By default, an EXA can communicate with any other EXA in the same network. This 
 	Name string
 	Code string
 	Error string
+	LineNum int
+	Marks map[string]int
 }
 
 func (e *Exa) ReadFile() (string, error) {

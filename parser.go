@@ -16,6 +16,7 @@ func NewExa(filePath string) (Exa, error) {
 		Name: name,
 		FileCursor: 0,
 		M: make(chan string, 1),
+		Marks: make(map[string]int),
 	}
 	vm.Exas = append(vm.Exas, exa)
 
@@ -25,6 +26,7 @@ func NewExa(filePath string) (Exa, error) {
 
 	for lineNum, line := range codeLines {
 		if len(line) == 0 { continue }
+		exa.LineNum = lineNum + 1
 		words := strings.Split(line, " ")
 		keyword := Unwrap(NewKeyword(words[0]))
 		// Enforce HOST as the first command of a program
@@ -118,7 +120,10 @@ func muli() error { return nil }
 func divi() error { return nil }
 func modi() error { return nil }
 func swiz() error { return nil }
-func mark() error { return nil }
+func mark(name string, exa *Exa) error { 
+	exa.Marks[name] = exa.LineNum
+	return nil
+}
 func jump() error { return nil }
 func tjmp() error { return nil }
 func fjmp() error { return nil }
@@ -331,7 +336,11 @@ func (k Keyword) Eval(exa *Exa, args... string) error {
 	case DIVI: return divi()
 	case MODI: return modi()
 	case SWIZ: return swiz()
-	case MARK: return mark()
+	case MARK: 
+		if len(args) <= 1 {
+			return errors.New("MARK: missing label" )
+		}
+		return mark(args[1], exa)
 	case JUMP: return jump()
 	case TJMP: return tjmp()
 	case FJMP: return fjmp()

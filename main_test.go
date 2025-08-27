@@ -351,3 +351,25 @@ func TestGrabTwoFiles(t *testing.T) {
 }
 
 // GRAB
+
+// MARK
+func TestMarkNoLabel(t *testing.T) {
+	_, err := NewExa("./tests/MARK/NoLabel.exa")
+
+	if err == nil {
+		t.Error("MarkNoLabel failed, expected error to be thrown when label isn't provided")
+	}
+}
+func TestMarkLabel(t *testing.T) {
+	exa := Unwrap(NewExa("./tests/MARK/Label.exa"))
+	lineNum, ok := exa.Marks["test"]
+
+	if !ok {
+		t.Error(fmt.Sprintf("GrabMarkLabel failed, expected mark named 'test' got [%v]", exa.Marks))
+	}
+
+	if lineNum != 3 {
+		t.Error(fmt.Sprintf("GrabMarkLabel failed, expected line number 3 got %d", lineNum))
+	}
+}
+// MARK
