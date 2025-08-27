@@ -10,7 +10,7 @@ import (
 
 
 type VM struct {
-	Exas int
+	Exas []Exa
 	Files int
 }
 
@@ -29,12 +29,14 @@ If an EXA writes to the M register, it will pause execution until that value is 
 By default, an EXA can communicate with any other EXA in the same network. This can be restircted to EXAs in the same network. This can be restricted to EXAs in the same host by executing a MODE instruction. An EXA in global mode cannot communicate with an EXA in local mode, even if they are in the same host.
 	*/
 	M chan string
+	// Can this Exa communicate with another Exa in this Host
 	LocalMode bool
 	FileCursor int
 	Host string
 	Links []int
 	Name string
 	Code string
+	Error string
 }
 
 func (e *Exa) ReadFile() (string, error) {

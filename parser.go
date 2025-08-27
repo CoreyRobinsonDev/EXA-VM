@@ -9,7 +9,6 @@ import (
 )
 
 func NewExa(filePath string) (Exa, error) {
-	vm.Exas++
 	code := string(Unwrap(os.ReadFile(filePath)))
 	name := strings.Split(strings.Split(filePath, "/")[len(strings.Split(filePath, "/"))-1], ".")[0]
 	exa := Exa {
@@ -18,6 +17,8 @@ func NewExa(filePath string) (Exa, error) {
 		FileCursor: 0,
 		M: make(chan string, 1),
 	}
+	vm.Exas = append(vm.Exas, exa)
+
 	file := Unwrap(os.Open(filePath))
 	defer file.Close()
 	codeLines := strings.Split(code, "\n")
@@ -28,18 +29,18 @@ func NewExa(filePath string) (Exa, error) {
 		keyword := Unwrap(NewKeyword(words[0]))
 		// Enforce HOST as the first command of a program
 		if keyword != HOST && exa.Host == "" {
-			vm.Exas--
-			return Exa{}, errors.New(fmt.Sprintf("%s %d: HOST must be defined at the start of program execution", name, lineNum))
+			err := fmt.Sprintf("%s %d: HOST must be defined at the start of program execution", name, lineNum)
+			exa.Error = err
+			return exa, errors.New(err)
 		}
 		err := keyword.Eval(&exa, words...)
 
 		if err != nil {
-			vm.Exas--
-			return Exa{}, err
+			exa.Error = err.Error()
+			return exa, err
 		}
 	}
 
-	vm.Exas--
 	return exa, nil
 }
 
